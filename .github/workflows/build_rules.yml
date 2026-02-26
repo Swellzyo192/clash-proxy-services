@@ -79,3 +79,4 @@ jobs:
             echo "✅ JSON pushed, changes committed."
           else
             echo "ℹ️ No changes detected, nothing to commit."
+          fi
