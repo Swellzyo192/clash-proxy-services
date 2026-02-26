@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (WORKING)
+name: Auto Update Aggregated Rules (FULL)
 
 on:
   workflow_dispatch:
@@ -20,24 +20,37 @@ jobs:
       with:
         node-version: 20
 
-    - name: Download sources
+    - name: Download sources (robust)
       run: |
-        set -e
         mkdir -p sources
 
-        # proxy list
-        curl -fSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt \
-          -o sources/proxy.txt
+        echo "Downloading proxy.txt"
+        if curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt -o sources/proxy.txt; then
+          echo "✔ proxy.txt downloaded"
+        else
+          echo "❌ proxy.txt failed"
+        fi
 
-        # geosite domains
-        curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/data/russia.yaml \
-          -o sources/russia-geosite.yaml
+        echo "Downloading geosite"
+        if curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/data/russia.yaml -o sources/russia-geosite.yaml; then
+          echo "✔ russia-geosite.yaml downloaded"
+        else
+          echo "❌ russia-geosite.yaml failed"
+        fi
 
-        # geoip ipset
-        curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/ip.ipset \
-          -o sources/russia-geoip.ipset
+        echo "Downloading geoip ipv4.ipset"
+        if curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/ipv4.ipset -o sources/ipv4.ipset; then
+          echo "✔ ipv4.ipset downloaded"
+        else
+          echo "❌ ipv4.ipset failed"
+        fi
 
-        echo "✅ All sources downloaded successfully"
+        echo "Downloading geoip ipv6.ipset"
+        if curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/ipv6.ipset -o sources/ipv6.ipset; then
+          echo "✔ ipv6.ipset downloaded"
+        else
+          echo "❌ ipv6.ipset failed"
+        fi
 
     - name: Generate JSON
       run: |
@@ -45,6 +58,7 @@ jobs:
         const fs = require('fs');
 
         function readYamlList(path) {
+          if (!fs.existsSync(path)) return [];
           const content = fs.readFileSync(path, "utf8");
           return content
             .split("\n")
@@ -54,6 +68,7 @@ jobs:
         }
 
         function readIpset(path) {
+          if (!fs.existsSync(path)) return [];
           return fs.readFileSync(path, "utf8")
             .split("\n")
             .map(l => l.trim())
@@ -61,6 +76,7 @@ jobs:
         }
 
         function readProxy(path) {
+          if (!fs.existsSync(path)) return [];
           return fs.readFileSync(path, "utf8")
             .split("\n")
             .map(l => l.trim())
@@ -68,15 +84,17 @@ jobs:
         }
 
         const geosite = readYamlList("sources/russia-geosite.yaml");
-        const geoip   = readIpset("sources/russia-geoip.ipset");
-        const proxy   = readProxy("sources/proxy.txt");
+        const geoip_ipv4 = readIpset("sources/ipv4.ipset");
+        const geoip_ipv6 = readIpset("sources/ipv6.ipset");
+        const proxy = readProxy("sources/proxy.txt");
 
         console.log("→ Geosite count:", geosite.length);
-        console.log("→ GeoIP count:", geoip.length);
+        console.log("→ GeoIP IPv4 count:", geoip_ipv4.length);
+        console.log("→ GeoIP IPv6 count:", geoip_ipv6.length);
         console.log("→ Proxy count:", proxy.length);
 
         const aggregated = {
-          direct: [...new Set([...geosite, ...geoip])],
+          direct: [...new Set([...geosite, ...geoip_ipv4, ...geoip_ipv6])],
           proxy: [...new Set(proxy)]
         };
 
