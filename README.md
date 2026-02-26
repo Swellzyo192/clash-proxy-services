@@ -1,2 +1,43 @@
-# clash-proxy-services
-Auto-updating aggregated Clash rules for Russia and popular services
+# Clash Proxy Services 🔧
+
+Автоматически обновляемые правила для Clash/FlClash с фокусом на Россию и популярные сервисы.
+
+[![GitHub last commit](https://img.shields.io/github/last-commit/Swellzyo192/clash-proxy-services)](https://github.com/Swellzyo192/clash-proxy-services/commits/main)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/Swellzyo192/clash-proxy-services/build_rules.yml)](https://github.com/Swellzyo192/clash-proxy-services/actions)
+
+## 📋 О проекте
+
+Проект автоматически собирает и обновляет списки доменов для прокси-клиентов (Clash, FlClash), разделяя их на:
+- **direct** — сайты, которые должны работать напрямую (РФ, CN, локальные ресурсы)
+- **proxy** — сайты, которые лучше открывать через прокси (зарубежные сервисы)
+
+## 🏗️ Архитектура проекта
+flclash-updater/
+├─ aggregated_rules.json # Основной JSON с категориями direct/proxy
+├─ extra_domains.txt # Ручное добавление специфичных доменов
+├─ flclash_update.py # Скрипт генерации YAML для FlClash
+├─ flclash_rules.yaml # Готовый конфиг для FlClash (создаётся скриптом)
+└─ .github/workflows/ # Автоматизация на GitHub Actions
+└─ build_rules.yml # Сбор и обновление правил
+
+## 🔄 Как это работает
+
+1. **Сбор данных** — GitHub Actions запускает скрипты, скачивает актуальные списки доменов
+2. **Агрегация** — данные преобразуются в `aggregated_rules.json`
+3. **Обогащение** — добавляются домены из `extra_domains.txt`
+4. **Генерация конфига** — Python-скрипт создаёт `flclash_rules.yaml` без дубликатов
+5. **Публикация** — изменения автоматически коммитятся и пушатся в репозиторий
+
+## 🚀 Быстрый старт
+
+### Для FlClash
+
+Добавьте в ваш конфиг FlClash ссылку на ruleset:
+
+```yaml
+rule-providers:
+  services:
+    type: http
+    behavior: domain
+    url: "https://raw.githubusercontent.com/Swellzyo192/clash-proxy-services/main/flclash_rules.yaml"
+    interval: 86400
