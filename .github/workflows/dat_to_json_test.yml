@@ -21,31 +21,30 @@ jobs:
         with:
           dat-dir: sources
 
-      - name: Install dependencies
-        run: |
-          npm install @loyalsoldier/geosite
+      - name: Install parser
+        run: npm install @loyalsoldier/geosite
 
       - name: Convert DAT to JSON
         run: |
           node << 'EOF'
-          const fs = require('fs');
-          const geosite = require('@loyalsoldier/geosite');
+          const fs = require("fs");
+          const geosite = require("@loyalsoldier/geosite");
 
-          const DAT_FILE = 'sources/geosite.dat';
-          const OUTPUT_JSON = 'aggregated_test.json';
+          const DAT_PATH = "sources/geosite.dat";
+          const OUT_JSON = "aggregated_test.json";
 
-          if (!fs.existsSync(DAT_FILE)) {
-            console.error("❌ geosite.dat not found!");
+          if (!fs.existsSync(DAT_PATH)) {
+            console.error("❌ geosite.dat not found — abort");
             process.exit(1);
           }
 
-          const rules = geosite.loadSync(DAT_FILE);
+          const rules = geosite.loadSync(DAT_PATH);
 
           const direct = [];
           const proxy = [];
 
-          for (const [category, domains] of Object.entries(rules)) {
-            if (category.includes("CN") || category.includes("RU")) {
+          for (const [cat, domains] of Object.entries(rules)) {
+            if (cat.includes("CN") || cat.includes("RU")) {
               direct.push(...domains);
             } else {
               proxy.push(...domains);
@@ -57,12 +56,12 @@ jobs:
             proxy: [...new Set(proxy)]
           };
 
-          fs.writeFileSync(OUTPUT_JSON, JSON.stringify(aggregated, null, 2));
-          console.log("✅ JSON created:", OUTPUT_JSON);
+          fs.writeFileSync(OUT_JSON, JSON.stringify(aggregated, null, 2));
+
+          console.log("🟢 JSON created:", OUT_JSON);
           console.log("Direct count:", aggregated.direct.length);
           console.log("Proxy count:", aggregated.proxy.length);
           EOF
 
-      - name: Show JSON sample
-        run: |
-          head -n 20 aggregated_test.json
+      - name: Show sample
+        run: head -n 20 aggregated_test.json
