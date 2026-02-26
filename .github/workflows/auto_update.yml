@@ -1,30 +1,30 @@
-name: Auto Update Clean Aggregated Rules with Checks
+name: Auto Update Aggregated Rules
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 3 * * *"
+    - cron: "0 3 * * *"  # ежедневно в 03:00 UTC
 
 jobs:
   update:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repo
+    - name: Checkout repository
       uses: actions/checkout@v3
       with:
         token: ${{ secrets.CLASH_PAT }}
 
-    - name: Setup Node
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: 20
 
-    - name: Download text sources with checks
+    - name: Download sources with validation
       run: |
         mkdir -p sources
 
-        # Список текстовых файлов с рабочими ссылками
+        # Список источников
         declare -A files
         files=(
           ["proxy.txt"]="https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt"
@@ -36,15 +36,15 @@ jobs:
         for f in "${!files[@]}"; do
           url=${files[$f]}
           echo "Downloading $f from $url"
-          curl -sSL "$url" -o "sources/$f"
+          curl -fsSL "$url" -o "sources/$f"
           if [ ! -s "sources/$f" ]; then
-            echo "❌ $f is empty or 404 — abort"
+            echo "❌ $f is empty or missing — abort workflow"
             exit 1
           fi
         done
         echo "✅ All sources downloaded successfully"
 
-    - name: Generate clean JSON
+    - name: Generate aggregated_rules.json
       run: |
         node << 'EOF'
         const fs = require('fs');
@@ -58,15 +58,15 @@ jobs:
         }
 
         const proxy = cleanLines("sources/proxy.txt");
-        const geosite = cleanLines("sources/russia.txt");
+        const directDomains = cleanLines("sources/russia.txt");
         const ipv4 = cleanLines("sources/ipv4.txt");
         const ipv6 = cleanLines("sources/ipv6.txt");
 
-        if (!proxy.length) throw new Error("Proxy list is empty! Check source URL.");
-        if (!geosite.length && !ipv4.length && !ipv6.length) throw new Error("Direct list is empty! Check source URLs.");
+        if (!proxy.length) throw new Error("Proxy list is empty — check source URL!");
+        if (!directDomains.length && !ipv4.length && !ipv6.length) throw new Error("Direct list is empty — check source URLs!");
 
         const aggregated = {
-          direct: [...new Set([...geosite, ...ipv4, ...ipv6])],
+          direct: [...new Set([...directDomains, ...ipv4, ...ipv6])],
           proxy: [...new Set(proxy)]
         };
 
@@ -76,10 +76,10 @@ jobs:
         console.log("Proxy rules:", aggregated.proxy.length);
         EOF
 
-    - name: Commit & Push
+    - name: Commit & Push changes
       run: |
         git config user.name "swellzyo192"
         git config user.email "swellzyo@gmail.com"
         git add aggregated_rules.json
-        git commit -m "Auto update clean aggregated rules" || echo "No changes"
+        git commit -m "Auto update aggregated rules" || echo "No changes"
         git push
