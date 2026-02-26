@@ -10,9 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      # ------------------------------
+      - name: Checkout repository with PAT
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.PAT_TOKEN }}
 
+      # ------------------------------
       - name: Download proxy list
         run: |
           mkdir -p sources
@@ -22,6 +26,7 @@ jobs:
         run: |
           curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt -o sources/direct-list.txt
 
+      # ------------------------------
       - name: Build aggregated_rules.json
         run: |
           python3 - << 'EOF'
@@ -45,15 +50,15 @@ jobs:
           print(f"✅ Built aggregated_rules.json: direct={len(aggregated['direct'])}, proxy={len(aggregated['proxy'])}")
           EOF
 
+      # ------------------------------
       - name: Show JSON sample
         run: head -n 20 aggregated_rules.json
 
+      # ------------------------------
       - name: Commit & Push
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "swellzyo192"
+          git config user.email "swellzyo@gmail.com"
           git add aggregated_rules.json
           git commit -m "Auto update aggregated rules" || echo "No changes"
-          git push https://$PAT_TOKEN@github.com/${{ github.repository }}.git HEAD:main
+          git push origin main
