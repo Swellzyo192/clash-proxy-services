@@ -2,19 +2,16 @@ name: Update Aggregated Rules
 
 on:
   schedule:
-    # Ежедневно в 03:00 UTC
-    - cron: '0 3 * * *'
-  workflow_dispatch: # Можно запускать вручную
+    - cron: '0 3 * * *' # ежедневно в 03:00 UTC
+  workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout репозитория
+      # 1️⃣ Checkout
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          persist-credentials: true
 
       # 2️⃣ Установка Node.js
       - name: Setup Node.js
@@ -22,7 +19,7 @@ jobs:
         with:
           node-version: '20'
 
-      # 3️⃣ Установка библиотеки js-yaml
+      # 3️⃣ Установка js-yaml
       - name: Install js-yaml
         run: npm install js-yaml
 
@@ -66,7 +63,6 @@ jobs:
             aggregated.proxy.push(...proxyList);
           } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
 
-          // Дедупликация
           for (let key in aggregated) {
             aggregated[key] = Array.from(new Set(aggregated[key]));
           }
@@ -74,13 +70,21 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Commit и push через PAT_TOKEN
-      - name: Commit and push via PAT
+      # 6️⃣ Установка GitHub CLI
+      - name: Install GitHub CLI
+        run: sudo apt install gh -y
+
+      # 7️⃣ Аутентификация через PAT
+      - name: Authenticate GitHub CLI
+        run: echo $PAT_TOKEN | gh auth login --with-token
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+
+      # 8️⃣ Commit и push через GitHub CLI
+      - name: Commit and push via GitHub CLI
         run: |
           git config --local user.email "swellzyo@gmail.com"
           git config --local user.name "swellzyo192"
           git add aggregated_rules.json
           git diff --cached --quiet || git commit -m "Auto-update aggregated rules [skip ci]"
-          git push https://$PAT_TOKEN@github.com/Swellzyo192/clash-proxy-services.git HEAD:main
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
+          gh repo sync Swellzyo192/clash-proxy-services --branch main --push
