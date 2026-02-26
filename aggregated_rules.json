@@ -1,7 +1,8 @@
 {
-  "direct": [],
-  "proxy": [],
-  "proxy_social": [],
-  "proxy_stream": [],
-  "proxy_game": []
+  "direct": [
+    "404"
+  ],
+  "proxy": [
+    "404: Not Found"
+  ]
 }
