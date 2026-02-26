@@ -22,7 +22,7 @@ jobs:
         run: python convert_to_clash.py
       
       - name: Сохранить результат
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: clash-rules
           path: clash_rules.yaml
