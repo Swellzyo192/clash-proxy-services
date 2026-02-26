@@ -27,10 +27,10 @@ jobs:
         # proxy list
         curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt -o sources/proxy.txt
 
-        # geosite (текстовый вариант)
+        # geosite text list (проверенный текстовый вариант)
         curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/russia.txt -o sources/russia.txt
 
-        # ipv4/ipv6 (текстовые списки, если есть)
+        # ipv4/ipv6 текстовые списки (если есть)
         curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv4.txt -o sources/ipv4.txt || echo "No ipv4.txt"
         curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv6.txt -o sources/ipv6.txt || echo "No ipv6.txt"
 
@@ -49,18 +49,18 @@ jobs:
         node << 'EOF'
         const fs = require('fs');
 
-        function readLines(path) {
+        function cleanLines(path) {
           if (!fs.existsSync(path)) return [];
           return fs.readFileSync(path, 'utf8')
             .split('\n')
             .map(l => l.trim())
-            .filter(l => l && !l.includes("404"));
+            .filter(l => l && l !== "payload:" && !l.startsWith("- "));
         }
 
-        const proxy = readLines("sources/proxy.txt");
-        const geosite = readLines("sources/russia.txt");
-        const ipv4 = readLines("sources/ipv4.txt");
-        const ipv6 = readLines("sources/ipv6.txt");
+        const proxy = cleanLines("sources/proxy.txt");
+        const geosite = cleanLines("sources/russia.txt");
+        const ipv4 = cleanLines("sources/ipv4.txt");
+        const ipv6 = cleanLines("sources/ipv6.txt");
 
         const aggregated = {
           direct: [...new Set([...geosite, ...ipv4, ...ipv6])],
@@ -73,6 +73,8 @@ jobs:
         );
 
         console.log("✅ aggregated_rules.json created!");
+        console.log("Direct rules:", aggregated.direct.length);
+        console.log("Proxy rules:", aggregated.proxy.length);
         EOF
 
     - name: Commit & Push
