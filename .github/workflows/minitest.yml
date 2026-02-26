@@ -1,0 +1,2 @@
+- name: Convert DAT to JSON
+  run: node scripts/test-geosite-to-json.js
