@@ -1,0 +1,115 @@
+name: Auto Update Aggregated Rules (PROD)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.CLASH_PAT }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependency
+        run: npm install js-yaml
+
+      # =============================
+      # DOWNLOAD WITH STRICT CHECK
+      # =============================
+      - name: Download sources (strict)
+        run: |
+          set -e
+          mkdir -p sources
+
+          curl -fSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt \
+            -o sources/proxy.txt
+
+          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/data/russia.yaml \
+            -o sources/russia.yaml
+
+          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/data/russia.yaml \
+            -o sources/russia-geoip.yaml
+
+          echo "✅ All sources downloaded successfully"
+
+      # =============================
+      # GENERATE JSON WITH LOGGING
+      # =============================
+      - name: Generate JSON
+        run: |
+          cat > generate.js << 'EOF'
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+
+          function readYamlKeys(path) {
+            const content = fs.readFileSync(path, 'utf8');
+            const parsed = yaml.load(content);
+            if (!parsed || typeof parsed !== 'object') return [];
+            return Object.keys(parsed);
+          }
+
+          function readProxyList(path) {
+            return fs.readFileSync(path, 'utf8')
+              .split(/\r?\n/)
+              .filter(line => line && !line.startsWith('#'));
+          }
+
+          let aggregated = {
+            direct: [],
+            proxy: []
+          };
+
+          // GEOsite
+          const geosite = readYamlKeys('sources/russia.yaml');
+          console.log("GEOsite rules:", geosite.length);
+
+          // GEOIP
+          const geoip = readYamlKeys('sources/russia-geoip.yaml');
+          console.log("GEOIP rules:", geoip.length);
+
+          // Proxy
+          const proxy = readProxyList('sources/proxy.txt');
+          console.log("Proxy rules:", proxy.length);
+
+          aggregated.direct = [...new Set([...geosite, ...geoip])];
+          aggregated.proxy = [...new Set(proxy)];
+
+          console.log("Final DIRECT count:", aggregated.direct.length);
+          console.log("Final PROXY count:", aggregated.proxy.length);
+
+          if (aggregated.direct.length === 0 || aggregated.proxy.length === 0) {
+            console.error("❌ Generated empty rules — aborting");
+            process.exit(1);
+          }
+
+          fs.writeFileSync(
+            'aggregated_rules.json',
+            JSON.stringify(aggregated, null, 2)
+          );
+
+          console.log("✅ aggregated_rules.json generated successfully");
+          EOF
+
+          node generate.js
+
+      # =============================
+      # COMMIT & PUSH
+      # =============================
+      - name: Commit & Push
+        run: |
+          git config user.name "swellzyo192"
+          git config user.email "swellzyo@gmail.com"
+
+          git add aggregated_rules.json
+          git commit -m "Auto update aggregated rules" || echo "No changes"
+          git push
