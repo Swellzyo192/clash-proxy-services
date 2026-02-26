@@ -3,13 +3,13 @@ name: Update Aggregated Rules
 on:
   schedule:
     - cron: '0 3 * * *' # ежедневно в 03:00 UTC
-  workflow_dispatch:
+  workflow_dispatch: # можно запускать вручную
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout
+      # 1️⃣ Checkout репозитория
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -63,6 +63,7 @@ jobs:
             aggregated.proxy.push(...proxyList);
           } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
 
+          // Дедупликация
           for (let key in aggregated) {
             aggregated[key] = Array.from(new Set(aggregated[key]));
           }
@@ -70,21 +71,13 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Установка GitHub CLI
-      - name: Install GitHub CLI
-        run: sudo apt install gh -y
-
-      # 7️⃣ Аутентификация через PAT
-      - name: Authenticate GitHub CLI
-        run: echo $PAT_TOKEN | gh auth login --with-token
-        env:
-          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
-
-      # 8️⃣ Commit и push через GitHub CLI
-      - name: Commit and push via GitHub CLI
+      # 6️⃣ Commit и push через PAT напрямую
+      - name: Commit and push via PAT
         run: |
           git config --local user.email "swellzyo@gmail.com"
           git config --local user.name "swellzyo192"
           git add aggregated_rules.json
           git diff --cached --quiet || git commit -m "Auto-update aggregated rules [skip ci]"
-          gh repo sync Swellzyo192/clash-proxy-services --branch main --push
+          git push https://$PAT_TOKEN@github.com/Swellzyo192/clash-proxy-services.git HEAD:main
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
