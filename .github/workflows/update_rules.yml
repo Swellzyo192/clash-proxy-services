@@ -10,9 +10,11 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout репозитория
+      # 1️⃣ Checkout репозитория с токеном
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       # 2️⃣ Установка Node.js
       - name: Setup Node.js
@@ -75,7 +77,7 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Commit и push через GITHUB_TOKEN
+      # 6️⃣ Commit и push через токен
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
@@ -83,5 +85,3 @@ jobs:
           git add aggregated_rules.json
           git commit -m "Auto-update aggregated rules [skip ci]" || echo "No changes"
           git push origin HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
