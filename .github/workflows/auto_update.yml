@@ -1,4 +1,4 @@
-name: Auto Update Clean Aggregated Rules
+name: Auto Update Clean Aggregated Rules with Checks
 
 on:
   workflow_dispatch:
@@ -20,29 +20,29 @@ jobs:
       with:
         node-version: 20
 
-    - name: Download text sources
+    - name: Download text sources with checks
       run: |
         mkdir -p sources
 
-        # proxy list
-        curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt -o sources/proxy.txt
+        # Список текстовых файлов с рабочими ссылками
+        declare -A files
+        files=(
+          ["proxy.txt"]="https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt"
+          ["russia.txt"]="https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/russia.txt"
+          ["ipv4.txt"]="https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv4.txt"
+          ["ipv6.txt"]="https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv6.txt"
+        )
 
-        # geosite text list (проверенный текстовый вариант)
-        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/russia.txt -o sources/russia.txt
-
-        # ipv4/ipv6 текстовые списки (если есть)
-        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv4.txt -o sources/ipv4.txt || echo "No ipv4.txt"
-        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv6.txt -o sources/ipv6.txt || echo "No ipv6.txt"
-
-        # проверка файлов
-        for f in sources/proxy.txt sources/russia.txt; do
-          if [ ! -s "$f" ]; then
-            echo "❌ File $f is empty — abort"
+        for f in "${!files[@]}"; do
+          url=${files[$f]}
+          echo "Downloading $f from $url"
+          curl -sSL "$url" -o "sources/$f"
+          if [ ! -s "sources/$f" ]; then
+            echo "❌ $f is empty or 404 — abort"
             exit 1
           fi
         done
-
-        echo "✅ All text sources downloaded"
+        echo "✅ All sources downloaded successfully"
 
     - name: Generate clean JSON
       run: |
@@ -54,7 +54,7 @@ jobs:
           return fs.readFileSync(path, 'utf8')
             .split('\n')
             .map(l => l.trim())
-            .filter(l => l && l !== "payload:" && !l.startsWith("- "));
+            .filter(l => l && l !== "404: Not Found" && l !== "payload:" && !l.startsWith("- "));
         }
 
         const proxy = cleanLines("sources/proxy.txt");
@@ -62,16 +62,15 @@ jobs:
         const ipv4 = cleanLines("sources/ipv4.txt");
         const ipv6 = cleanLines("sources/ipv6.txt");
 
+        if (!proxy.length) throw new Error("Proxy list is empty! Check source URL.");
+        if (!geosite.length && !ipv4.length && !ipv6.length) throw new Error("Direct list is empty! Check source URLs.");
+
         const aggregated = {
           direct: [...new Set([...geosite, ...ipv4, ...ipv6])],
           proxy: [...new Set(proxy)]
         };
 
-        fs.writeFileSync(
-          "aggregated_rules.json",
-          JSON.stringify(aggregated, null, 2)
-        );
-
+        fs.writeFileSync("aggregated_rules.json", JSON.stringify(aggregated, null, 2));
         console.log("✅ aggregated_rules.json created!");
         console.log("Direct rules:", aggregated.direct.length);
         console.log("Proxy rules:", aggregated.proxy.length);
