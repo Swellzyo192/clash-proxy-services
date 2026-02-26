@@ -1,0 +1,69 @@
+name: Update Aggregated Rules
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Download external rule sources
+        run: |
+          mkdir sources
+          curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/master/proxy.txt -o sources/proxy.txt
+          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml -o sources/russia.yaml
+          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml -o sources/russia-geoip.yaml
+
+      - name: Generate aggregated_rules.json
+        run: |
+          node << 'EOF'
+          const fs = require('fs');
+          const yaml = require('js-yaml');
+
+          let aggregated = {
+            direct: [],
+            proxy: [],
+            proxy_social: [],
+            proxy_stream: [],
+            proxy_game: []
+          };
+
+          try {
+            const geoSite = yaml.load(fs.readFileSync('sources/russia.yaml', 'utf8'));
+            aggregated.direct = Object.keys(geoSite || {});
+          } catch(e){ console.error("Ошибка чтения Russia GEO:", e) }
+
+          try {
+            const geoIP = yaml.load(fs.readFileSync('sources/russia-geoip.yaml', 'utf8'));
+            aggregated.direct.push(...Object.keys(geoIP || {}));
+          } catch(e){ console.error("Ошибка чтения Russia GEOIP:", e) }
+
+          try {
+            const proxyList = fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean);
+            aggregated.proxy.push(...proxyList);
+          } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
+
+          for (let key in aggregated) {
+            aggregated[key] = Array.from(new Set(aggregated[key]));
+          }
+
+          fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
+          EOF
+
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add aggregated_rules.json
+          git commit -m "Auto-update aggregated rules [skip ci]" || echo "No changes"
+          git push
