@@ -1,0 +1,66 @@
+name: DAT to JSON Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-dat:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+
+    - name: Install geosite parser
+      run: npm install @loyalsoldier/geosite
+
+    - name: Download geosite.dat
+      run: |
+        mkdir -p sources
+        curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/geosite/release/geosite.dat -o sources/geosite.dat
+        ls -l sources/
+
+    - name: Convert DAT to JSON
+      run: |
+        node << 'EOF'
+        const fs = require('fs');
+        const geosite = require('@loyalsoldier/geosite');
+
+        const DAT_FILE = 'sources/geosite.dat';
+        const OUTPUT_JSON = 'aggregated_test.json';
+
+        if (!fs.existsSync(DAT_FILE)) throw new Error('DAT file missing!');
+
+        const rules = geosite.loadSync(DAT_FILE);
+
+        const direct = [];
+        const proxy = [];
+
+        // Минимальный фильтр категорий
+        for (const [category, domains] of Object.entries(rules)) {
+          if (category.includes('CN') || category.includes('RU')) {
+            direct.push(...domains);
+          } else {
+            proxy.push(...domains);
+          }
+        }
+
+        const aggregated = {
+          direct: [...new Set(direct)],
+          proxy: [...new Set(proxy)]
+        };
+
+        fs.writeFileSync(OUTPUT_JSON, JSON.stringify(aggregated, null, 2));
+        console.log(`✅ JSON created: ${OUTPUT_JSON}`);
+        console.log(`Direct domains: ${aggregated.direct.length}`);
+        console.log(`Proxy domains: ${aggregated.proxy.length}`);
+        EOF
+
+    - name: Show JSON sample
+      run: |
+        head -n 20 aggregated_test.json
