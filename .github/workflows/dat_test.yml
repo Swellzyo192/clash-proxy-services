@@ -1,67 +1,26 @@
-name: DAT to JSON Converter
+name: Fetch DAT JSON
 
 on:
   workflow_dispatch:
 
 jobs:
-  generate-json:
+  fetch-json:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "20"
+      - name: Create sources folder
+        run: mkdir -p sources
 
-      - name: Install geosite parser
-        run: npm install @loyalsoldier/geosite
-
-      - name: Download geosite.dat
+      - name: Download aggregated JSON
         run: |
-          mkdir -p sources
-          curl -L -o sources/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
-
-      - name: Convert DAT to JSON
-        run: |
-          node << 'EOF'
-          const fs = require("fs");
-          const geosite = require("@loyalsoldier/geosite");
-
-          const DAT_PATH = "sources/geosite.dat";
-          const OUT_JSON = "aggregated_rules.json";
-
-          if (!fs.existsSync(DAT_PATH)) {
-            console.error("❌ geosite.dat not found — abort");
-            process.exit(1);
-          }
-
-          const rules = geosite.loadSync(DAT_PATH);
-
-          const direct = [];
-          const proxy = [];
-
-          for (const [cat, domains] of Object.entries(rules)) {
-            if (cat.includes("CN") || cat.includes("RU")) {
-              direct.push(...domains);
-            } else {
-              proxy.push(...domains);
-            }
-          }
-
-          const aggregated = {
-            direct: [...new Set(direct)],
-            proxy: [...new Set(proxy)]
-          };
-
-          fs.writeFileSync(OUT_JSON, JSON.stringify(aggregated, null, 2));
-
-          console.log("🟢 JSON created:", OUT_JSON);
-          console.log("Direct count:", aggregated.direct.length);
-          console.log("Proxy count:", aggregated.proxy.length);
-          EOF
+          curl -L -o aggregated_rules.json \
+          https://github.com/Loyalsoldier/v2ray-rules-dat/raw/release/dnsmasq/aggregated.json
 
       - name: Show JSON sample
-        run: head -n 20 aggregated_rules.json
+        run: |
+          echo "---- JSON preview ----"
+          head -n 20 aggregated_rules.json
+          echo "---- end preview ----"
