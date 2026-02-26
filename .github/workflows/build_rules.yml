@@ -38,9 +38,11 @@ jobs:
               "direct": sorted(set(direct)),
               "proxy": sorted(set(proxy)),
           }
+
           with open("aggregated_rules.json", "w", encoding="utf-8") as f:
               json.dump(aggregated, f, indent=2)
-          print(f"Built aggregated_rules.json: direct={len(aggregated['direct'])}, proxy={len(aggregated['proxy'])}")
+
+          print(f"✅ Built aggregated_rules.json: direct={len(aggregated['direct'])}, proxy={len(aggregated['proxy'])}")
           EOF
 
       - name: Show JSON sample
