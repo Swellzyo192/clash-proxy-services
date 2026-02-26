@@ -19,11 +19,10 @@ jobs:
     - name: Install geosite parser
       run: npm install @loyalsoldier/geosite
 
-    - name: Download geosite.dat (follow redirects)
+    - name: Download geosite.dat (via jsdelivr)
       run: |
         mkdir -p sources
-        # Используем -L чтобы следовать редиректам GitHub Releases
-        curl -sL -o sources/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+        curl -fsSL https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat -o sources/geosite.dat
         ls -l sources/
 
     - name: Convert DAT to JSON
