@@ -1,9 +1,12 @@
-name: Build and Update Clash JSON
+name: Build and Update Clash Rules
 
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 3 * * *"  # ежедневно в 03:00 UTC
+
+permissions:
+  contents: write  # даём права на запись
 
 jobs:
   build:
@@ -12,7 +15,7 @@ jobs:
     steps:
       # ------------------------------
       - name: Checkout repository with PAT
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # обновил до v4
         with:
           token: ${{ secrets.PAT_TOKEN }}
 
@@ -67,16 +70,72 @@ jobs:
       - name: Show JSON sample
         run: head -n 20 aggregated_rules.json
 
-      # ------------------------------
+      # 👇 НОВЫЕ ШАГИ: Конвертация JSON → YAML
+      - name: Setup Python for YAML conversion
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install PyYAML
+        run: pip install pyyaml
+
+      - name: Convert JSON to Clash rules
+        run: |
+          python3 - << 'EOF'
+          import json
+          import yaml
+          import os
+
+          print("🔄 Конвертируем JSON в правила Clash...")
+          
+          # Читаем JSON
+          with open('aggregated_rules.json', 'r', encoding='utf-8') as f:
+              data = json.load(f)
+          
+          print(f"📊 Загружено: direct={len(data.get('direct', []))}, proxy={len(data.get('proxy', []))}")
+          
+          # Создаём правила
+          rules = []
+          
+          # Сначала DIRECT (важно для приоритета)
+          for domain in data.get('direct', []):
+              rules.append(f"DOMAIN-SUFFIX,{domain},DIRECT")
+          
+          # Потом PROXY
+          for domain in data.get('proxy', []):
+              rules.append(f"DOMAIN-SUFFIX,{domain},Proxy")
+          
+          # Сохраняем в YAML
+          config = {'rules': rules}
+          
+          with open('clash_rules.yaml', 'w', encoding='utf-8') as f:
+              yaml.dump(config, f, allow_unicode=True, default_flow_style=False)
+          
+          print(f"✅ Создано {len(rules)} правил")
+          
+          # Покажем статистику
+          direct_count = len(data.get('direct', []))
+          proxy_count = len(data.get('proxy', []))
+          print(f"📊 Итого: DIRECT={direct_count}, PROXY={proxy_count}")
+          EOF
+
+      - name: Show YAML sample
+        run: head -n 20 clash_rules.yaml
+
+      # 👇 ОБНОВЛЁННЫЙ ШАГ: Коммит обоих файлов
       - name: Commit & Push if changed
         run: |
           git config user.name "swellzyo192"
           git config user.email "swellzyo@gmail.com"
-          git add aggregated_rules.json
+          
+          # Добавляем оба файла
+          git add aggregated_rules.json clash_rules.yaml
+          
+          # Проверяем, есть ли изменения
           if ! git diff --cached --quiet; then
-            git commit -m "Auto update aggregated rules"
+            git commit -m "Auto update rules: JSON + YAML"
             git push origin main
-            echo "✅ JSON pushed, changes committed."
+            echo "✅ JSON и YAML обновлены и отправлены"
           else
-            echo "ℹ️ No changes detected, nothing to commit."
+            echo "ℹ️ Нет изменений, коммит не требуется"
           fi
