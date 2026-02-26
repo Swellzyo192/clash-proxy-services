@@ -1,9 +1,8 @@
 name: Generate Aggregated Rules
-
 on:
   schedule:
     - cron: '0 3 * * *'  # ежедневно в 03:00 UTC
-  workflow_dispatch:      # можно запускать вручную
+  workflow_dispatch:      # ручной запуск
 
 jobs:
   generate:
@@ -75,6 +74,8 @@ jobs:
           if [ ! -f aggregated_rules.json ]; then
             echo "❌ aggregated_rules.json не найден"
             exit 1
+          else
+            echo "✅ aggregated_rules.json найден, готов к upload"
           fi
 
       # 7️⃣ Upload artifact
