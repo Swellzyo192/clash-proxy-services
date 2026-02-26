@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (FINAL)
+name: Auto Update Aggregated Rules (NO NPM)
 
 on:
   workflow_dispatch:
@@ -15,16 +15,8 @@ jobs:
         with:
           token: ${{ secrets.CLASH_PAT }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 20
-
-      - name: Install dependency
-        run: npm install js-yaml
-
       # =============================
-      # STRICT DOWNLOAD
+      # DOWNLOAD SOURCES
       # =============================
       - name: Download sources
         run: |
@@ -43,50 +35,41 @@ jobs:
           echo "✅ Sources downloaded"
 
       # =============================
-      # GENERATE JSON CORRECTLY
+      # GENERATE JSON (PURE NODE, NO DEPENDENCIES)
       # =============================
       - name: Generate JSON
         run: |
-          cat > generate.js << 'EOF'
+          node << 'EOF'
           const fs = require('fs');
-          const yaml = require('js-yaml');
 
-          function readYamlPayload(path) {
-            try {
-              const content = fs.readFileSync(path, 'utf8');
-              const parsed = yaml.load(content);
-              if (!parsed || !parsed.payload || !Array.isArray(parsed.payload)) {
-                console.warn(`⚠ Invalid structure in ${path}`);
-                return [];
-              }
-              return parsed.payload;
-            } catch (e) {
-              console.error(`❌ Failed parsing ${path}:`, e.message);
-              return [];
-            }
+          function extractYamlList(path) {
+            const content = fs.readFileSync(path, 'utf8');
+            return content
+              .split('\n')
+              .map(line => line.trim())
+              .filter(line => line.startsWith('- '))
+              .map(line => line.substring(2).trim());
           }
 
-          function readProxyList(path) {
+          function extractProxy(path) {
             return fs.readFileSync(path, 'utf8')
-              .split(/\r?\n/)
-              .filter(line => line && !line.startsWith('#'));
+              .split('\n')
+              .map(l => l.trim())
+              .filter(l => l && !l.startsWith('#'));
           }
 
-          let aggregated = {
-            direct: [],
-            proxy: []
+          const geosite = extractYamlList('sources/russia.yaml');
+          const geoip = extractYamlList('sources/russia-geoip.yaml');
+          const proxy = extractProxy('sources/proxy.txt');
+
+          console.log("Geosite:", geosite.length);
+          console.log("GeoIP:", geoip.length);
+          console.log("Proxy:", proxy.length);
+
+          const aggregated = {
+            direct: [...new Set([...geosite, ...geoip])],
+            proxy: [...new Set(proxy)]
           };
-
-          const geosite = readYamlPayload('sources/russia.yaml');
-          const geoip = readYamlPayload('sources/russia-geoip.yaml');
-          const proxy = readProxyList('sources/proxy.txt');
-
-          console.log("Geosite entries:", geosite.length);
-          console.log("GeoIP entries:", geoip.length);
-          console.log("Proxy entries:", proxy.length);
-
-          aggregated.direct = [...new Set([...geosite, ...geoip])];
-          aggregated.proxy = [...new Set(proxy)];
 
           console.log("Final DIRECT:", aggregated.direct.length);
           console.log("Final PROXY:", aggregated.proxy.length);
@@ -103,8 +86,6 @@ jobs:
 
           console.log("✅ JSON generated successfully");
           EOF
-
-          node generate.js
 
       # =============================
       # COMMIT & PUSH
