@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (PROD)
+name: Auto Update Aggregated Rules (FINAL)
 
 on:
   workflow_dispatch:
@@ -24,9 +24,9 @@ jobs:
         run: npm install js-yaml
 
       # =============================
-      # DOWNLOAD WITH STRICT CHECK
+      # STRICT DOWNLOAD
       # =============================
-      - name: Download sources (strict)
+      - name: Download sources
         run: |
           set -e
           mkdir -p sources
@@ -40,10 +40,10 @@ jobs:
           curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/data/russia.yaml \
             -o sources/russia-geoip.yaml
 
-          echo "✅ All sources downloaded successfully"
+          echo "✅ Sources downloaded"
 
       # =============================
-      # GENERATE JSON WITH LOGGING
+      # GENERATE JSON CORRECTLY
       # =============================
       - name: Generate JSON
         run: |
@@ -51,11 +51,19 @@ jobs:
           const fs = require('fs');
           const yaml = require('js-yaml');
 
-          function readYamlKeys(path) {
-            const content = fs.readFileSync(path, 'utf8');
-            const parsed = yaml.load(content);
-            if (!parsed || typeof parsed !== 'object') return [];
-            return Object.keys(parsed);
+          function readYamlPayload(path) {
+            try {
+              const content = fs.readFileSync(path, 'utf8');
+              const parsed = yaml.load(content);
+              if (!parsed || !parsed.payload || !Array.isArray(parsed.payload)) {
+                console.warn(`⚠ Invalid structure in ${path}`);
+                return [];
+              }
+              return parsed.payload;
+            } catch (e) {
+              console.error(`❌ Failed parsing ${path}:`, e.message);
+              return [];
+            }
           }
 
           function readProxyList(path) {
@@ -69,26 +77,22 @@ jobs:
             proxy: []
           };
 
-          // GEOsite
-          const geosite = readYamlKeys('sources/russia.yaml');
-          console.log("GEOsite rules:", geosite.length);
-
-          // GEOIP
-          const geoip = readYamlKeys('sources/russia-geoip.yaml');
-          console.log("GEOIP rules:", geoip.length);
-
-          // Proxy
+          const geosite = readYamlPayload('sources/russia.yaml');
+          const geoip = readYamlPayload('sources/russia-geoip.yaml');
           const proxy = readProxyList('sources/proxy.txt');
-          console.log("Proxy rules:", proxy.length);
+
+          console.log("Geosite entries:", geosite.length);
+          console.log("GeoIP entries:", geoip.length);
+          console.log("Proxy entries:", proxy.length);
 
           aggregated.direct = [...new Set([...geosite, ...geoip])];
           aggregated.proxy = [...new Set(proxy)];
 
-          console.log("Final DIRECT count:", aggregated.direct.length);
-          console.log("Final PROXY count:", aggregated.proxy.length);
+          console.log("Final DIRECT:", aggregated.direct.length);
+          console.log("Final PROXY:", aggregated.proxy.length);
 
           if (aggregated.direct.length === 0 || aggregated.proxy.length === 0) {
-            console.error("❌ Generated empty rules — aborting");
+            console.error("❌ Empty result — aborting");
             process.exit(1);
           }
 
@@ -97,7 +101,7 @@ jobs:
             JSON.stringify(aggregated, null, 2)
           );
 
-          console.log("✅ aggregated_rules.json generated successfully");
+          console.log("✅ JSON generated successfully");
           EOF
 
           node generate.js
