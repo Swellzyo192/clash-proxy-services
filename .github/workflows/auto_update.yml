@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (NO NPM)
+name: Auto Update Aggregated Rules (FINAL)
 
 on:
   workflow_dispatch:
@@ -15,9 +15,11 @@ jobs:
         with:
           token: ${{ secrets.CLASH_PAT }}
 
-      # =============================
-      # DOWNLOAD SOURCES
-      # =============================
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
       - name: Download sources
         run: |
           set -e
@@ -26,17 +28,14 @@ jobs:
           curl -fSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt \
             -o sources/proxy.txt
 
-          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/data/russia.yaml \
-            -o sources/russia.yaml
+          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml \
+            -o sources/russia-geosite.yaml
 
-          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/data/russia.yaml \
+          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml \
             -o sources/russia-geoip.yaml
 
           echo "✅ Sources downloaded"
 
-      # =============================
-      # GENERATE JSON (PURE NODE, NO DEPENDENCIES)
-      # =============================
       - name: Generate JSON
         run: |
           node << 'EOF'
@@ -46,36 +45,37 @@ jobs:
             const content = fs.readFileSync(path, 'utf8');
             return content
               .split('\n')
-              .map(line => line.trim())
-              .filter(line => line.startsWith('- '))
-              .map(line => line.substring(2).trim());
+              .map(l => l.trim())
+              .filter(l => l.startsWith('- '))
+              .map(l => l.slice(2).trim());
           }
 
-          function extractProxy(path) {
+          function readProxy(path) {
             return fs.readFileSync(path, 'utf8')
               .split('\n')
               .map(l => l.trim())
               .filter(l => l && !l.startsWith('#'));
           }
 
-          const geosite = extractYamlList('sources/russia.yaml');
+          const geosite = extractYamlList('sources/russia-geosite.yaml');
           const geoip = extractYamlList('sources/russia-geoip.yaml');
-          const proxy = extractProxy('sources/proxy.txt');
+          const proxy = readProxy('sources/proxy.txt');
 
-          console.log("Geosite:", geosite.length);
-          console.log("GeoIP:", geoip.length);
-          console.log("Proxy:", proxy.length);
+          console.log('Geosite count:', geosite.length);
+          console.log('GeoIP count:', geoip.length);
+          console.log('Proxy count:', proxy.length);
 
           const aggregated = {
             direct: [...new Set([...geosite, ...geoip])],
             proxy: [...new Set(proxy)]
           };
 
-          console.log("Final DIRECT:", aggregated.direct.length);
-          console.log("Final PROXY:", aggregated.proxy.length);
-
-          if (aggregated.direct.length === 0 || aggregated.proxy.length === 0) {
-            console.error("❌ Empty result — aborting");
+          if (aggregated.direct.length === 0) {
+            console.error('❌ DIRECT list empty — aborting');
+            process.exit(1);
+          }
+          if (aggregated.proxy.length === 0) {
+            console.error('❌ PROXY list empty — aborting');
             process.exit(1);
           }
 
@@ -83,18 +83,13 @@ jobs:
             'aggregated_rules.json',
             JSON.stringify(aggregated, null, 2)
           );
-
-          console.log("✅ JSON generated successfully");
+          console.log('✅ JSON created successfully');
           EOF
 
-      # =============================
-      # COMMIT & PUSH
-      # =============================
       - name: Commit & Push
         run: |
           git config user.name "swellzyo192"
           git config user.email "swellzyo@gmail.com"
-
           git add aggregated_rules.json
           git commit -m "Auto update aggregated rules" || echo "No changes"
           git push
