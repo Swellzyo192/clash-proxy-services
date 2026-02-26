@@ -2,21 +2,25 @@ name: Update Aggregated Rules
 
 on:
   schedule:
+    # Запуск каждый день в 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch:
+  workflow_dispatch: # Можно запускать вручную
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      # 1️⃣ Checkout репозитория
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # 2️⃣ Установка Node.js для скрипта
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      # 3️⃣ Скачать внешние источники правил
       - name: Download external rule sources
         run: |
           mkdir sources
@@ -24,12 +28,14 @@ jobs:
           curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml -o sources/russia.yaml
           curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml -o sources/russia-geoip.yaml
 
+      # 4️⃣ Преобразовать в агрегированный JSON
       - name: Generate aggregated_rules.json
         run: |
           node << 'EOF'
           const fs = require('fs');
           const yaml = require('js-yaml');
 
+          // Создаём объект
           let aggregated = {
             direct: [],
             proxy: [],
@@ -53,6 +59,7 @@ jobs:
             aggregated.proxy.push(...proxyList);
           } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
 
+          // Дедупликация
           for (let key in aggregated) {
             aggregated[key] = Array.from(new Set(aggregated[key]));
           }
@@ -60,6 +67,7 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
+      # 5️⃣ Commit и push
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
