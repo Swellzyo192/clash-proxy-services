@@ -3,7 +3,7 @@ name: Generate Aggregated Rules
 on:
   schedule:
     - cron: '0 3 * * *'  # ежедневно в 03:00 UTC
-  workflow_dispatch:      # можно запускать вручную
+  workflow_dispatch:
 
 jobs:
   generate:
@@ -69,9 +69,20 @@ jobs:
           }
 
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
+          console.log("✅ aggregated_rules.json создан успешно");
           EOF
 
-      # 6️⃣ Сохранение как artifact
+      # 6️⃣ Проверка, что файл существует перед загрузкой
+      - name: Check aggregated_rules.json exists
+        run: |
+          if [ -f aggregated_rules.json ]; then
+            echo "File exists, ready to upload"
+          else
+            echo "Error: aggregated_rules.json not found"
+            exit 1
+          fi
+
+      # 7️⃣ Upload artifact
       - name: Upload aggregated_rules.json as artifact
         uses: actions/upload-artifact@v3
         with:
