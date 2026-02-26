@@ -34,7 +34,9 @@ jobs:
 
           def read_lines(path):
               with open(path, "r", encoding="utf-8") as f:
-                  return [l.strip() for l in f.read().splitlines() if l.strip() and not l.startswith("#")]
+                  lines = [l.strip() for l in f.read().splitlines() if l.strip()]
+                  # фильтр мусорных строк
+                  return [l for l in lines if not l.startswith("404") and "." in l]
 
           proxy = read_lines("sources/proxy-list.txt")
           direct = read_lines("sources/direct-list.txt")
@@ -55,10 +57,16 @@ jobs:
         run: head -n 20 aggregated_rules.json
 
       # ------------------------------
-      - name: Commit & Push
+      - name: Commit & Push if changed
         run: |
           git config user.name "swellzyo192"
           git config user.email "swellzyo@gmail.com"
           git add aggregated_rules.json
-          git commit -m "Auto update aggregated rules" || echo "No changes"
-          git push origin main
+          # проверяем, есть ли изменения
+          if ! git diff --cached --quiet; then
+            git commit -m "Auto update aggregated rules"
+            git push origin main
+            echo "✅ JSON pushed, changes committed."
+          else
+            echo "ℹ️ No changes detected, nothing to commit."
+          fi
