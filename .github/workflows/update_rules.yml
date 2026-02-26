@@ -1,12 +1,12 @@
-name: Update Aggregated Rules
+name: Generate Aggregated Rules
 
 on:
   schedule:
-    - cron: '0 3 * * *' # ежедневно в 03:00 UTC
-  workflow_dispatch: # запуск вручную
+    - cron: '0 3 * * *'  # ежедневно в 03:00 UTC
+  workflow_dispatch:      # можно запускать вручную
 
 jobs:
-  update:
+  generate:
     runs-on: ubuntu-latest
     steps:
       # 1️⃣ Checkout репозитория
@@ -71,11 +71,9 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Commit и push напрямую через HTTPS с токеном
-      - name: Commit and push via PAT
-        run: |
-          git config --local user.email "swellzyo@gmail.com"
-          git config --local user.name "swellzyo192"
-          git add aggregated_rules.json
-          git diff --cached --quiet || git commit -m "Auto-update aggregated rules [skip ci]"
-          git push https://swellzyo192:${{ secrets.PAT_TOKEN }}@github.com/Swellzyo192/clash-proxy-services.git HEAD:main
+      # 6️⃣ Сохранение как artifact
+      - name: Upload aggregated_rules.json as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: aggregated_rules
+          path: aggregated_rules.json
