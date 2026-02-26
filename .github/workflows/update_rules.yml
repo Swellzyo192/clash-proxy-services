@@ -4,17 +4,17 @@ on:
   schedule:
     # Ежедневно в 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch: # Можно запускать вручную
+  workflow_dispatch: # Запуск вручную
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout репозитория с токеном
+      # 1️⃣ Checkout репозитория с правами на push
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       # 2️⃣ Установка Node.js
       - name: Setup Node.js
@@ -49,21 +49,18 @@ jobs:
             proxy_game: []
           };
 
-          // Читаем GEO сайты РФ
           try {
             const geoSiteContent = fs.existsSync('sources/russia.yaml') ? fs.readFileSync('sources/russia.yaml', 'utf8') : '{}';
             const geoSite = yaml.load(geoSiteContent) || {};
             aggregated.direct.push(...Object.keys(geoSite));
           } catch(e){ console.error("Ошибка чтения Russia GEO:", e) }
 
-          // Читаем GEO IP РФ
           try {
             const geoIPContent = fs.existsSync('sources/russia-geoip.yaml') ? fs.readFileSync('sources/russia-geoip.yaml', 'utf8') : '{}';
             const geoIP = yaml.load(geoIPContent) || {};
             aggregated.direct.push(...Object.keys(geoIP));
           } catch(e){ console.error("Ошибка чтения Russia GEOIP:", e) }
 
-          // Читаем список прокси
           try {
             const proxyList = fs.existsSync('sources/proxy.txt') ? fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean) : [];
             aggregated.proxy.push(...proxyList);
@@ -77,11 +74,11 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Commit и push через токен
+      # 6️⃣ Commit и push через встроенные credentials
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add aggregated_rules.json
-          git commit -m "Auto-update aggregated rules [skip ci]" || echo "No changes"
-          git push origin HEAD:main
+          git diff --cached --quiet || git commit -m "Auto-update aggregated rules [skip ci]"
+          git push
