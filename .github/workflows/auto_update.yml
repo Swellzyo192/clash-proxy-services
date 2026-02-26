@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (DAT)
+name: Auto Update Clean Aggregated Rules
 
 on:
   workflow_dispatch:
@@ -20,76 +20,58 @@ jobs:
       with:
         node-version: 20
 
-    - name: Download sources
+    - name: Download text sources
       run: |
         mkdir -p sources
 
         # proxy list
-        echo "Downloading proxy.txt"
         curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt -o sources/proxy.txt
 
-        # geosite dat
-        echo "Downloading geosite.dat"
-        curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/release/geosite.dat -o sources/geosite.dat
+        # geosite (текстовый вариант)
+        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/russia.txt -o sources/russia.txt
 
-        # geoip dat
-        echo "Downloading geoip-ru-only.dat"
-        curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/release/geoip-ru-only.dat -o sources/geoip.dat
+        # ipv4/ipv6 (текстовые списки, если есть)
+        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv4.txt -o sources/ipv4.txt || echo "No ipv4.txt"
+        curl -sSL https://raw.githubusercontent.com/Swellzyo192/working-text-sources/main/ipv6.txt -o sources/ipv6.txt || echo "No ipv6.txt"
 
         # проверка файлов
-        for f in sources/*; do
+        for f in sources/proxy.txt sources/russia.txt; do
           if [ ! -s "$f" ]; then
             echo "❌ File $f is empty — abort"
             exit 1
           fi
         done
-        echo "✅ All sources downloaded"
 
-    - name: Generate JSON
+        echo "✅ All text sources downloaded"
+
+    - name: Generate clean JSON
       run: |
         node << 'EOF'
         const fs = require('fs');
 
-        function readProxy(path) {
+        function readLines(path) {
+          if (!fs.existsSync(path)) return [];
           return fs.readFileSync(path, 'utf8')
             .split('\n')
             .map(l => l.trim())
             .filter(l => l && !l.includes("404"));
         }
 
-        function readDat(path) {
-          return fs.readFileSync(path, 'utf8')
-            .split('\n')
-            .map(l => l.trim())
-            .filter(l => l && !l.includes("404"));
-        }
-
-        const proxy = readProxy("sources/proxy.txt");
-        const geosite = readDat("sources/geosite.dat");
-        const geoip = readDat("sources/geoip.dat");
-
-        console.log("→ Proxy count:", proxy.length);
-        console.log("→ Geosite count:", geosite.length);
-        console.log("→ GeoIP count:", geoip.length);
+        const proxy = readLines("sources/proxy.txt");
+        const geosite = readLines("sources/russia.txt");
+        const ipv4 = readLines("sources/ipv4.txt");
+        const ipv6 = readLines("sources/ipv6.txt");
 
         const aggregated = {
-          direct: [...new Set([...geosite, ...geoip])],
+          direct: [...new Set([...geosite, ...ipv4, ...ipv6])],
           proxy: [...new Set(proxy)]
         };
-
-        if (!aggregated.direct.length) {
-          console.error("❌ DIRECT list empty — abort!");
-          process.exit(1);
-        }
-        if (!aggregated.proxy.length) {
-          console.error("❌ PROXY list empty — abort!");
-          process.exit(1);
-        }
 
         fs.writeFileSync(
           "aggregated_rules.json",
           JSON.stringify(aggregated, null, 2)
         );
+
         console.log("✅ aggregated_rules.json created!");
         EOF
 
@@ -98,5 +80,5 @@ jobs:
         git config user.name "swellzyo192"
         git config user.email "swellzyo@gmail.com"
         git add aggregated_rules.json
-        git commit -m "Auto update aggregated rules" || echo "No changes"
+        git commit -m "Auto update clean aggregated rules" || echo "No changes"
         git push
