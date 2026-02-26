@@ -2,9 +2,9 @@ name: Update Aggregated Rules
 
 on:
   schedule:
-    # Запуск каждый день в 03:00 UTC
+    # Ежедневно в 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch: # Можно запускать вручную
+  workflow_dispatch: # Возможность запускать вручную
 
 jobs:
   update:
@@ -14,28 +14,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Установка Node.js для скрипта
+      # 2️⃣ Установка Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # 3️⃣ Скачать внешние источники правил
+      # 3️⃣ Установка библиотеки js-yaml
+      - name: Install js-yaml
+        run: npm install js-yaml
+
+      # 4️⃣ Скачать внешние источники правил
       - name: Download external rule sources
         run: |
-          mkdir sources
-          curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/master/proxy.txt -o sources/proxy.txt
-          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml -o sources/russia.yaml
-          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml -o sources/russia-geoip.yaml
+          mkdir -p sources
+          curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/master/proxy.txt -o sources/proxy.txt || echo "proxy.txt not downloaded"
+          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml -o sources/russia.yaml || echo "russia.yaml not downloaded"
+          curl -sSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml -o sources/russia-geoip.yaml || echo "russia-geoip.yaml not downloaded"
 
-      # 4️⃣ Преобразовать в агрегированный JSON
+      # 5️⃣ Генерация aggregated_rules.json
       - name: Generate aggregated_rules.json
         run: |
           node << 'EOF'
           const fs = require('fs');
           const yaml = require('js-yaml');
 
-          // Создаём объект
           let aggregated = {
             direct: [],
             proxy: [],
@@ -44,18 +47,23 @@ jobs:
             proxy_game: []
           };
 
+          // Читаем GEO сайты РФ
           try {
-            const geoSite = yaml.load(fs.readFileSync('sources/russia.yaml', 'utf8'));
-            aggregated.direct = Object.keys(geoSite || {});
+            const geoSiteContent = fs.existsSync('sources/russia.yaml') ? fs.readFileSync('sources/russia.yaml', 'utf8') : '{}';
+            const geoSite = yaml.load(geoSiteContent) || {};
+            aggregated.direct.push(...Object.keys(geoSite));
           } catch(e){ console.error("Ошибка чтения Russia GEO:", e) }
 
+          // Читаем GEO IP РФ
           try {
-            const geoIP = yaml.load(fs.readFileSync('sources/russia-geoip.yaml', 'utf8'));
-            aggregated.direct.push(...Object.keys(geoIP || {}));
+            const geoIPContent = fs.existsSync('sources/russia-geoip.yaml') ? fs.readFileSync('sources/russia-geoip.yaml', 'utf8') : '{}';
+            const geoIP = yaml.load(geoIPContent) || {};
+            aggregated.direct.push(...Object.keys(geoIP));
           } catch(e){ console.error("Ошибка чтения Russia GEOIP:", e) }
 
+          // Читаем список прокси
           try {
-            const proxyList = fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean);
+            const proxyList = fs.existsSync('sources/proxy.txt') ? fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean) : [];
             aggregated.proxy.push(...proxyList);
           } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
 
@@ -67,7 +75,7 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 5️⃣ Commit и push
+      # 6️⃣ Commit и push
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
