@@ -1,4 +1,4 @@
-name: DAT to JSON Action
+name: DAT to JSON Converter
 
 on:
   workflow_dispatch:
@@ -8,14 +8,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Generate JSON from DAT
-        uses: Loyalsoldier/geosite-action@v1
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
         with:
-          dat-dir: sources
-          output-json: aggregated_rules.json
+          node-version: "20"
+
+      - name: Install geosite parser
+        run: npm install @loyalsoldier/geosite
+
+      - name: Download geosite.dat
+        run: |
+          mkdir -p sources
+          curl -L -o sources/geosite.dat https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat
+
+      - name: Convert DAT to JSON
+        run: |
+          node << 'EOF'
+          const fs = require("fs");
+          const geosite = require("@loyalsoldier/geosite");
+
+          const DAT_PATH = "sources/geosite.dat";
+          const OUT_JSON = "aggregated_rules.json";
+
+          if (!fs.existsSync(DAT_PATH)) {
+            console.error("❌ geosite.dat not found — abort");
+            process.exit(1);
+          }
+
+          const rules = geosite.loadSync(DAT_PATH);
+
+          const direct = [];
+          const proxy = [];
+
+          for (const [cat, domains] of Object.entries(rules)) {
+            if (cat.includes("CN") || cat.includes("RU")) {
+              direct.push(...domains);
+            } else {
+              proxy.push(...domains);
+            }
+          }
+
+          const aggregated = {
+            direct: [...new Set(direct)],
+            proxy: [...new Set(proxy)]
+          };
+
+          fs.writeFileSync(OUT_JSON, JSON.stringify(aggregated, null, 2));
+
+          console.log("🟢 JSON created:", OUT_JSON);
+          console.log("Direct count:", aggregated.direct.length);
+          console.log("Proxy count:", aggregated.proxy.length);
+          EOF
 
       - name: Show JSON sample
         run: head -n 20 aggregated_rules.json
