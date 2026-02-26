@@ -1,4 +1,4 @@
-name: Auto Update Aggregated Rules (FINAL)
+name: Auto Update Aggregated Rules FINAL
 
 on:
   workflow_dispatch:
@@ -20,6 +20,9 @@ jobs:
         with:
           node-version: 20
 
+      # ====================================
+      # DOWNLOAD SOURCES (без 404)
+      # ====================================
       - name: Download sources
         run: |
           set -e
@@ -31,39 +34,48 @@ jobs:
           curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geosite/main/russia.yaml \
             -o sources/russia-geosite.yaml
 
-          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/russia.yaml \
-            -o sources/russia-geoip.yaml
+          curl -fSL https://raw.githubusercontent.com/runetfreedom/russia-blocked-geoip/main/ip.ipset \
+            -o sources/russia-geoip.ipset
 
           echo "✅ Sources downloaded"
 
+      # ====================================
+      # GENERATE JSON
+      # ====================================
       - name: Generate JSON
         run: |
           node << 'EOF'
           const fs = require('fs');
 
-          function extractYamlList(path) {
-            const content = fs.readFileSync(path, 'utf8');
-            return content
+          function readYamlList(path) {
+            return fs.readFileSync(path, 'utf8')
               .split('\n')
               .map(l => l.trim())
               .filter(l => l.startsWith('- '))
               .map(l => l.slice(2).trim());
           }
 
-          function readProxy(path) {
+          function readIpset(path) {
             return fs.readFileSync(path, 'utf8')
               .split('\n')
               .map(l => l.trim())
               .filter(l => l && !l.startsWith('#'));
           }
 
-          const geosite = extractYamlList('sources/russia-geosite.yaml');
-          const geoip = extractYamlList('sources/russia-geoip.yaml');
-          const proxy = readProxy('sources/proxy.txt');
+          function readProxyList(path) {
+            return fs.readFileSync(path, 'utf8')
+              .split('\n')
+              .map(l => l.trim())
+              .filter(l => l && !l.startsWith('#'));
+          }
 
-          console.log('Geosite count:', geosite.length);
-          console.log('GeoIP count:', geoip.length);
-          console.log('Proxy count:', proxy.length);
+          const geosite = readYamlList('sources/russia-geosite.yaml');
+          const geoip = readIpset('sources/russia-geoip.ipset');
+          const proxy = readProxyList('sources/proxy.txt');
+
+          console.log("GEOsite count:", geosite.length);
+          console.log("GEOIP count:", geoip.length);
+          console.log("Proxy count:", proxy.length);
 
           const aggregated = {
             direct: [...new Set([...geosite, ...geoip])],
@@ -71,11 +83,11 @@ jobs:
           };
 
           if (aggregated.direct.length === 0) {
-            console.error('❌ DIRECT list empty — aborting');
+            console.error("❌ DIRECT list empty — aborting");
             process.exit(1);
           }
           if (aggregated.proxy.length === 0) {
-            console.error('❌ PROXY list empty — aborting');
+            console.error("❌ PROXY list empty — aborting");
             process.exit(1);
           }
 
@@ -83,9 +95,12 @@ jobs:
             'aggregated_rules.json',
             JSON.stringify(aggregated, null, 2)
           );
-          console.log('✅ JSON created successfully');
+          console.log("✅ JSON created successfully");
           EOF
 
+      # ====================================
+      # COMMIT & PUSH
+      # ====================================
       - name: Commit & Push
         run: |
           git config user.name "swellzyo192"
