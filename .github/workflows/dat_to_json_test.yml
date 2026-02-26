@@ -1,10 +1,10 @@
-name: Mini Test DAT to JSON
+name: Mini DAT to JSON
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-dat:
+  dat-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -16,14 +16,13 @@ jobs:
       with:
         node-version: 20
 
+    - name: Download DAT files
+      uses: Loyalsoldier/v2ray-rules-dat-action@v1
+      with:
+        dat-dir: sources
+
     - name: Install geosite parser
       run: npm install @loyalsoldier/geosite
-
-    - name: Download geosite.dat (via jsdelivr)
-      run: |
-        mkdir -p sources
-        curl -fsSL https://cdn.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat -o sources/geosite.dat
-        ls -l sources/
 
     - name: Convert DAT to JSON
       run: |
