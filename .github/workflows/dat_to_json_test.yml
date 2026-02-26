@@ -14,15 +14,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: "20"
 
       - name: Download DAT files
         uses: Loyalsoldier/v2ray-rules-dat-action@v1
         with:
           dat-dir: sources
 
-      - name: Install geosite parser
-        run: npm install @loyalsoldier/geosite
+      - name: Install dependencies
+        run: |
+          npm install @loyalsoldier/geosite
 
       - name: Convert DAT to JSON
         run: |
@@ -33,7 +34,10 @@ jobs:
           const DAT_FILE = 'sources/geosite.dat';
           const OUTPUT_JSON = 'aggregated_test.json';
 
-          if (!fs.existsSync(DAT_FILE)) throw new Error('geosite.dat missing!');
+          if (!fs.existsSync(DAT_FILE)) {
+            console.error("❌ geosite.dat not found!");
+            process.exit(1);
+          }
 
           const rules = geosite.loadSync(DAT_FILE);
 
@@ -41,7 +45,7 @@ jobs:
           const proxy = [];
 
           for (const [category, domains] of Object.entries(rules)) {
-            if (category.includes('CN') || category.includes('RU')) {
+            if (category.includes("CN") || category.includes("RU")) {
               direct.push(...domains);
             } else {
               proxy.push(...domains);
@@ -54,9 +58,11 @@ jobs:
           };
 
           fs.writeFileSync(OUTPUT_JSON, JSON.stringify(aggregated, null, 2));
-          console.log(`✅ JSON создан: ${OUTPUT_JSON}`);
-          console.log(`Direct: ${aggregated.direct.length}, Proxy: ${aggregated.proxy.length}`);
+          console.log("✅ JSON created:", OUTPUT_JSON);
+          console.log("Direct count:", aggregated.direct.length);
+          console.log("Proxy count:", aggregated.proxy.length);
           EOF
 
       - name: Show JSON sample
-        run: head -n 20 aggregated_test.json
+        run: |
+          head -n 20 aggregated_test.json
