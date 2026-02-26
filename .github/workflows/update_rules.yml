@@ -3,7 +3,7 @@ name: Generate Aggregated Rules
 on:
   schedule:
     - cron: '0 3 * * *'  # ежедневно в 03:00 UTC
-  workflow_dispatch:
+  workflow_dispatch:      # запуск вручную
 
 jobs:
   generate:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Установка Node.js
+      # 2️⃣ Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
@@ -23,8 +23,8 @@ jobs:
       - name: Install js-yaml
         run: npm install js-yaml
 
-      # 4️⃣ Скачать внешние источники правил
-      - name: Download external rule sources
+      # 4️⃣ Скачать источники правил
+      - name: Download sources
         run: |
           mkdir -p sources
           curl -sSL https://raw.githubusercontent.com/Loyalsoldier/clash-rules/master/proxy.txt -o sources/proxy.txt || echo "proxy.txt not downloaded"
@@ -38,32 +38,29 @@ jobs:
           const fs = require('fs');
           const yaml = require('js-yaml');
 
-          let aggregated = {
-            direct: [],
-            proxy: [],
-            proxy_social: [],
-            proxy_stream: [],
-            proxy_game: []
-          };
+          let aggregated = { direct: [], proxy: [] };
 
+          // GEOsite
           try {
-            const geoSiteContent = fs.existsSync('sources/russia.yaml') ? fs.readFileSync('sources/russia.yaml', 'utf8') : '{}';
+            const geoSiteContent = fs.readFileSync('sources/russia.yaml', 'utf8');
             const geoSite = yaml.load(geoSiteContent) || {};
             aggregated.direct.push(...Object.keys(geoSite));
-          } catch(e){ console.error("Ошибка чтения Russia GEO:", e) }
+          } catch(e){ console.error(e) }
 
+          // GEOIP
           try {
-            const geoIPContent = fs.existsSync('sources/russia-geoip.yaml') ? fs.readFileSync('sources/russia-geoip.yaml', 'utf8') : '{}';
+            const geoIPContent = fs.readFileSync('sources/russia-geoip.yaml', 'utf8');
             const geoIP = yaml.load(geoIPContent) || {};
             aggregated.direct.push(...Object.keys(geoIP));
-          } catch(e){ console.error("Ошибка чтения Russia GEOIP:", e) }
+          } catch(e){ console.error(e) }
 
+          // Proxy
           try {
-            const proxyList = fs.existsSync('sources/proxy.txt') ? fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean) : [];
+            const proxyList = fs.readFileSync('sources/proxy.txt', 'utf8').split(/\r?\n/).filter(Boolean);
             aggregated.proxy.push(...proxyList);
-          } catch(e){ console.error("Ошибка чтения Proxy list:", e) }
+          } catch(e){ console.error(e) }
 
-          // Дедупликация
+          // Deduplicate
           for (let key in aggregated) {
             aggregated[key] = Array.from(new Set(aggregated[key]));
           }
@@ -72,13 +69,11 @@ jobs:
           console.log("✅ aggregated_rules.json создан успешно");
           EOF
 
-      # 6️⃣ Проверка, что файл существует перед загрузкой
-      - name: Check aggregated_rules.json exists
+      # 6️⃣ Проверка наличия файла
+      - name: Verify file exists
         run: |
-          if [ -f aggregated_rules.json ]; then
-            echo "File exists, ready to upload"
-          else
-            echo "Error: aggregated_rules.json not found"
+          if [ ! -f aggregated_rules.json ]; then
+            echo "❌ aggregated_rules.json не найден"
             exit 1
           fi
 
