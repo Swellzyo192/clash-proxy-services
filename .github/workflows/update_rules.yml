@@ -4,13 +4,13 @@ on:
   schedule:
     # Ежедневно в 03:00 UTC
     - cron: '0 3 * * *'
-  workflow_dispatch: # Запуск вручную
+  workflow_dispatch: # Можно запускать вручную
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
-      # 1️⃣ Checkout репозитория с правами на push
+      # 1️⃣ Checkout репозитория
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
@@ -74,11 +74,13 @@ jobs:
           fs.writeFileSync('aggregated_rules.json', JSON.stringify(aggregated, null, 2));
           EOF
 
-      # 6️⃣ Commit и push через встроенные credentials
-      - name: Commit and push
+      # 6️⃣ Commit и push через PAT_TOKEN
+      - name: Commit and push via PAT
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "swellzyo@gmail.com"
+          git config --local user.name "swellzyo192"
           git add aggregated_rules.json
           git diff --cached --quiet || git commit -m "Auto-update aggregated rules [skip ci]"
-          git push
+          git push https://$PAT_TOKEN@github.com/Swellzyo192/clash-proxy-services.git HEAD:main
+        env:
+          PAT_TOKEN: ${{ secrets.PAT_TOKEN }}
