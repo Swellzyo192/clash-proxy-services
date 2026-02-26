@@ -27,10 +27,11 @@ jobs:
           curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt -o sources/direct-list.txt
 
       # ------------------------------
-      - name: Build aggregated_rules.json
+      - name: Build aggregated_rules.json with logging
         run: |
           python3 - << 'EOF'
           import json
+          import os
 
           def read_lines(path):
               with open(path, "r", encoding="utf-8") as f:
@@ -46,10 +47,20 @@ jobs:
               "proxy": sorted(set(proxy)),
           }
 
-          with open("aggregated_rules.json", "w", encoding="utf-8") as f:
+          # сравнение с предыдущим файлом для логирования изменений
+          old_file = "aggregated_rules.json"
+          old_data = {"direct": [], "proxy": []}
+          if os.path.exists(old_file):
+              with open(old_file, "r", encoding="utf-8") as f:
+                  old_data = json.load(f)
+
+          new_direct = len(aggregated["direct"]) - len(old_data.get("direct", []))
+          new_proxy = len(aggregated["proxy"]) - len(old_data.get("proxy", []))
+
+          with open(old_file, "w", encoding="utf-8") as f:
               json.dump(aggregated, f, indent=2)
 
-          print(f"✅ Built aggregated_rules.json: direct={len(aggregated['direct'])}, proxy={len(aggregated['proxy'])}")
+          print(f"✅ Built aggregated_rules.json: direct={len(aggregated['direct'])} (+{new_direct}), proxy={len(aggregated['proxy'])} (+{new_proxy})")
           EOF
 
       # ------------------------------
@@ -62,11 +73,9 @@ jobs:
           git config user.name "swellzyo192"
           git config user.email "swellzyo@gmail.com"
           git add aggregated_rules.json
-          # проверяем, есть ли изменения
           if ! git diff --cached --quiet; then
             git commit -m "Auto update aggregated rules"
             git push origin main
             echo "✅ JSON pushed, changes committed."
           else
             echo "ℹ️ No changes detected, nothing to commit."
-          fi
