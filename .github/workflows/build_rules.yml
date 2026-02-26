@@ -1,0 +1,55 @@
+name: Build Clash JSON from v2ray rules
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 * * *"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Download proxy list
+        run: |
+          mkdir -p sources
+          curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/proxy-list.txt -o sources/proxy-list.txt
+
+      - name: Download direct list
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/direct-list.txt -o sources/direct-list.txt
+
+      - name: Build aggregated_rules.json
+        run: |
+          python3 - << 'EOF'
+          import json
+
+          def read_lines(path):
+              with open(path, "r", encoding="utf-8") as f:
+                  return [l.strip() for l in f.read().splitlines() if l.strip() and not l.startswith("#")]
+
+          proxy = read_lines("sources/proxy-list.txt")
+          direct = read_lines("sources/direct-list.txt")
+
+          aggregated = {
+              "direct": sorted(set(direct)),
+              "proxy": sorted(set(proxy)),
+          }
+          with open("aggregated_rules.json", "w", encoding="utf-8") as f:
+              json.dump(aggregated, f, indent=2)
+          print(f"Built aggregated_rules.json: direct={len(aggregated['direct'])}, proxy={len(aggregated['proxy'])}")
+          EOF
+
+      - name: Show sample
+        run: head -n 20 aggregated_rules.json
+
+      - name: Commit & Push
+        run: |
+          git config user.name "swellzyo192"
+          git config user.email "swellzyo@gmail.com"
+          git add aggregated_rules.json
+          git commit -m "Auto update aggregated rules" || echo "No changes"
+          git push
