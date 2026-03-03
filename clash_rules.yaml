@@ -69804,6 +69804,7 @@ rules:
 - DOMAIN-SUFFIX,mongac.com,DIRECT
 - DOMAIN-SUFFIX,monhun.fun,DIRECT
 - DOMAIN-SUFFIX,monidata.com,DIRECT
+- DOMAIN-SUFFIX,monika.love,DIRECT
 - DOMAIN-SUFFIX,monkeylsp.com,DIRECT
 - DOMAIN-SUFFIX,monknow.com,DIRECT
 - DOMAIN-SUFFIX,mono.work,DIRECT
@@ -130276,6 +130277,7 @@ rules:
 - DOMAIN-SUFFIX,jav.la,Proxy
 - DOMAIN-SUFFIX,jav.land,Proxy
 - DOMAIN-SUFFIX,jav.place,Proxy
+- DOMAIN-SUFFIX,jav.sb,Proxy
 - DOMAIN-SUFFIX,jav.si,Proxy
 - DOMAIN-SUFFIX,jav.wine,Proxy
 - DOMAIN-SUFFIX,jav01.cc,Proxy
@@ -130348,6 +130350,7 @@ rules:
 - DOMAIN-SUFFIX,javher.com,Proxy
 - DOMAIN-SUFFIX,javheroine.com,Proxy
 - DOMAIN-SUFFIX,javhihi.com,Proxy
+- DOMAIN-SUFFIX,javhub.com,Proxy
 - DOMAIN-SUFFIX,javhub.me,Proxy
 - DOMAIN-SUFFIX,javhub.net,Proxy
 - DOMAIN-SUFFIX,javhuge.com,Proxy
@@ -130383,6 +130386,7 @@ rules:
 - DOMAIN-SUFFIX,javpub.me,Proxy
 - DOMAIN-SUFFIX,javpush.com,Proxy
 - DOMAIN-SUFFIX,javqd.com,Proxy
+- DOMAIN-SUFFIX,javquick.com,Proxy
 - DOMAIN-SUFFIX,javrank.com,Proxy
 - DOMAIN-SUFFIX,javrate.com,Proxy
 - DOMAIN-SUFFIX,javrave.club,Proxy
