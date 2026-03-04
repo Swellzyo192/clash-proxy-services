@@ -2251,6 +2251,7 @@ rules:
 - DOMAIN-SUFFIX,17293879b10261.beer,DIRECT
 - DOMAIN-SUFFIX,172haoka.vip,DIRECT
 - DOMAIN-SUFFIX,172l.com,DIRECT
+- DOMAIN-SUFFIX,172mix.com,DIRECT
 - DOMAIN-SUFFIX,172tt.com,DIRECT
 - DOMAIN-SUFFIX,172xiaoyuan.com,DIRECT
 - DOMAIN-SUFFIX,173.com,DIRECT
@@ -59233,6 +59234,7 @@ rules:
 - DOMAIN-SUFFIX,juziss.com,DIRECT
 - DOMAIN-SUFFIX,juzistore.com,DIRECT
 - DOMAIN-SUFFIX,juzisy.com,DIRECT
+- DOMAIN-SUFFIX,juziwulian.com,DIRECT
 - DOMAIN-SUFFIX,juzix.io,DIRECT
 - DOMAIN-SUFFIX,juzizhoutou.net,DIRECT
 - DOMAIN-SUFFIX,juzone.cc,DIRECT
@@ -119552,6 +119554,7 @@ rules:
 - DOMAIN-SUFFIX,area120.com,Proxy
 - DOMAIN-SUFFIX,area51.to,Proxy
 - DOMAIN-SUFFIX,areca-backup.org,Proxy
+- DOMAIN-SUFFIX,arena.ai,Proxy
 - DOMAIN-SUFFIX,arena.taipei,Proxy
 - DOMAIN-SUFFIX,arethusa.su,Proxy
 - DOMAIN-SUFFIX,arewereadyyet.com,Proxy
@@ -119583,6 +119586,7 @@ rules:
 - DOMAIN-SUFFIX,artstor.org,Proxy
 - DOMAIN-SUFFIX,artstorm.com,Proxy
 - DOMAIN-SUFFIX,arvanstorage.ir,Proxy
+- DOMAIN-SUFFIX,arweave.org,Proxy
 - DOMAIN-SUFFIX,arxiv.org,Proxy
 - DOMAIN-SUFFIX,arzon.jp,Proxy
 - DOMAIN-SUFFIX,as-hp.ca,Proxy
@@ -123701,6 +123705,7 @@ rules:
 - DOMAIN-SUFFIX,diablo3.com,Proxy
 - DOMAIN-SUFFIX,diabloimmortal.com,Proxy
 - DOMAIN-SUFFIX,diabrowser.com,Proxy
+- DOMAIN-SUFFIX,diabrowser.engineering,Proxy
 - DOMAIN-SUFFIX,dialga.com,Proxy
 - DOMAIN-SUFFIX,dialogflow.com,Proxy
 - DOMAIN-SUFFIX,diamantewebcam.com,Proxy
@@ -123959,6 +123964,7 @@ rules:
 - DOMAIN-SUFFIX,dl-iphone.com,Proxy
 - DOMAIN-SUFFIX,dl-laby.jp,Proxy
 - DOMAIN-SUFFIX,dl.box.net,Proxy
+- DOMAIN-SUFFIX,dlaf.jp,Proxy
 - DOMAIN-SUFFIX,dlap001.xyz,Proxy
 - DOMAIN-SUFFIX,dlap301.com,Proxy
 - DOMAIN-SUFFIX,dldlinks.com,Proxy
@@ -129448,9 +129454,8 @@ rules:
 - DOMAIN-SUFFIX,ilife.gr,Proxy
 - DOMAIN-SUFFIX,ilife.wang,Proxy
 - DOMAIN-SUFFIX,illawarramercury.com.au,Proxy
+- DOMAIN-SUFFIX,illgames.jp,Proxy
 - DOMAIN-SUFFIX,illianacomputerrecycling.com,Proxy
-- DOMAIN-SUFFIX,illusion.co.jp,Proxy
-- DOMAIN-SUFFIX,illusion.jp,Proxy
 - DOMAIN-SUFFIX,illusion111.com,Proxy
 - DOMAIN-SUFFIX,illusionas.com,Proxy
 - DOMAIN-SUFFIX,illusionchn.com,Proxy
@@ -130244,6 +130249,7 @@ rules:
 - DOMAIN-SUFFIX,jan.ai,Proxy
 - DOMAIN-SUFFIX,janor6.net,Proxy
 - DOMAIN-SUFFIX,japan-forward.com,Proxy
+- DOMAIN-SUFFIX,japan-illgames.com,Proxy
 - DOMAIN-SUFFIX,japan-whores.com,Proxy
 - DOMAIN-SUFFIX,japan18tube.com,Proxy
 - DOMAIN-SUFFIX,japanbeast.com,Proxy
@@ -139310,6 +139316,7 @@ rules:
 - DOMAIN-SUFFIX,tsuradou.noonvob.com,Proxy
 - DOMAIN-SUFFIX,tsyum.com,Proxy
 - DOMAIN-SUFFIX,tt1069.com,Proxy
+- DOMAIN-SUFFIX,ttcdn-us.com,Proxy
 - DOMAIN-SUFFIX,tteshop.com,Proxy
 - DOMAIN-SUFFIX,ttlivecdn.com,Proxy
 - DOMAIN-SUFFIX,ttoverseaus.net,Proxy
@@ -141075,6 +141082,7 @@ rules:
 - DOMAIN-SUFFIX,wisekey.com.hk,Proxy
 - DOMAIN-SUFFIX,wisevid.com,Proxy
 - DOMAIN-SUFFIX,wish.com,Proxy
+- DOMAIN-SUFFIX,wispbyte.com,Proxy
 - DOMAIN-SUFFIX,wistia.com,Proxy
 - DOMAIN-SUFFIX,wistia.net,Proxy
 - DOMAIN-SUFFIX,withgoogle.com,Proxy
