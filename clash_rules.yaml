@@ -130458,6 +130458,7 @@ rules:
 - DOMAIN-SUFFIX,jessicaturner.co.uk,Proxy
 - DOMAIN-SUFFIX,jessicaturner.com,Proxy
 - DOMAIN-SUFFIX,jetbrains.ai,Proxy
+- DOMAIN-SUFFIX,jetbrains.cloud,Proxy
 - DOMAIN-SUFFIX,jetbrains.com,Proxy
 - DOMAIN-SUFFIX,jetbrains.net,Proxy
 - DOMAIN-SUFFIX,jetbrains.space,Proxy
