@@ -124119,6 +124119,7 @@ rules:
 - DOMAIN-SUFFIX,dowjoneson.com,Proxy
 - DOMAIN-SUFFIX,download.aircrack-ng.org,Proxy
 - DOMAIN-SUFFIX,download.com,Proxy
+- DOMAIN-SUFFIX,download.dappcdn.com,Proxy
 - DOMAIN-SUFFIX,download.qatp1.net,Proxy
 - DOMAIN-SUFFIX,downloadpass.com,Proxy
 - DOMAIN-SUFFIX,downloadsforipod.com,Proxy
@@ -135154,6 +135155,10 @@ rules:
 - DOMAIN-SUFFIX,pleasurebabe.com,Proxy
 - DOMAIN-SUFFIX,pleasuregirl.net,Proxy
 - DOMAIN-SUFFIX,pleasuremore.com,Proxy
+- DOMAIN-SUFFIX,plex.com,Proxy
+- DOMAIN-SUFFIX,plex.services,Proxy
+- DOMAIN-SUFFIX,plex.tv,Proxy
+- DOMAIN-SUFFIX,plexapp.com,Proxy
 - DOMAIN-SUFFIX,plexvpn.pro,Proxy
 - DOMAIN-SUFFIX,plos.org,Proxy
 - DOMAIN-SUFFIX,plug-into.com,Proxy
