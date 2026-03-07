@@ -126389,6 +126389,7 @@ rules:
 - DOMAIN-SUFFIX,full:aod-pod-uk-live.akamaized.net,Proxy
 - DOMAIN-SUFFIX,full:api-p.videomarket.jp,Proxy
 - DOMAIN-SUFFIX,full:api.viu.now.com,Proxy
+- DOMAIN-SUFFIX,full:apkmirror.disqus.com,Proxy
 - DOMAIN-SUFFIX,full:apl-hamivideo.cdn.hinet.net,Proxy
 - DOMAIN-SUFFIX,full:apple-tv-plus-press.apple.com,Proxy
 - DOMAIN-SUFFIX,full:apple.com.akadns.net,Proxy
@@ -126777,6 +126778,8 @@ rules:
 - DOMAIN-SUFFIX,full:spotify.map.fastly.net,Proxy
 - DOMAIN-SUFFIX,full:spotify.map.fastlylb.net,Proxy
 - DOMAIN-SUFFIX,full:ssl-lvlt.cdn.ea.com,Proxy
+- DOMAIN-SUFFIX,full:st-ok-pts.cdn-vk.ru,Proxy
+- DOMAIN-SUFFIX,full:st-ok.cdn-vk.ru,Proxy
 - DOMAIN-SUFFIX,full:standchartbank.sc.omtrdc.net,Proxy
 - DOMAIN-SUFFIX,full:standchartbank.tt.omtrdc.net,Proxy
 - DOMAIN-SUFFIX,full:static-hamivideo.cdn.hinet.net,Proxy
@@ -127002,6 +127005,7 @@ rules:
 - DOMAIN-SUFFIX,full:www-cdn.icloud.com.akadns.net,Proxy
 - DOMAIN-SUFFIX,full:yandex-pogoda.static-storage.net,Proxy
 - DOMAIN-SUFFIX,full:yangzhi.app,Proxy
+- DOMAIN-SUFFIX,full:youla-web-static.mrgcdn.ru,Proxy
 - DOMAIN-SUFFIX,full:yt3.googleusercontent.com,Proxy
 - DOMAIN-SUFFIX,full:zeenews-fonts.s3.amazonaws.com,Proxy
 - DOMAIN-SUFFIX,fulldesisex.com,Proxy
@@ -129947,6 +129951,7 @@ rules:
 - DOMAIN-SUFFIX,inventorfusion.com,Proxy
 - DOMAIN-SUFFIX,inventorseries.com,Proxy
 - DOMAIN-SUFFIX,inventorship.com.au,Proxy
+- DOMAIN-SUFFIX,investing.com,Proxy
 - DOMAIN-SUFFIX,investorschronicle.co.uk,Proxy
 - DOMAIN-SUFFIX,invidio.us,Proxy
 - DOMAIN-SUFFIX,invity.io,Proxy
@@ -133017,6 +133022,7 @@ rules:
 - DOMAIN-SUFFIX,musixmatch.com,Proxy
 - DOMAIN-SUFFIX,mut.ch,Proxy
 - DOMAIN-SUFFIX,muthead.com,Proxy
+- DOMAIN-SUFFIX,muvluv-girls-garden.com,Proxy
 - DOMAIN-SUFFIX,muycerdas.xxx,Proxy
 - DOMAIN-SUFFIX,muyzorras.com,Proxy
 - DOMAIN-SUFFIX,muzi.com,Proxy
@@ -134323,6 +134329,7 @@ rules:
 - DOMAIN-SUFFIX,onlyams.com,Proxy
 - DOMAIN-SUFFIX,onlycartoonsex.com,Proxy
 - DOMAIN-SUFFIX,onlydudes.com,Proxy
+- DOMAIN-SUFFIX,onlyfans.com,Proxy
 - DOMAIN-SUFFIX,onlyfanspw.com,Proxy
 - DOMAIN-SUFFIX,onlyfreelatinaporn.com,Proxy
 - DOMAIN-SUFFIX,onlygayvideo.com,Proxy
@@ -136990,6 +136997,7 @@ rules:
 - DOMAIN-SUFFIX,sellercommunity.com,Proxy
 - DOMAIN-SUFFIX,semanticscholar.org,Proxy
 - DOMAIN-SUFFIX,sena.co.kr,Proxy
+- DOMAIN-SUFFIX,sendvid.com,Proxy
 - DOMAIN-SUFFIX,seneporno.com,Proxy
 - DOMAIN-SUFFIX,seniortgp.com,Proxy
 - DOMAIN-SUFFIX,senpaiheat.com,Proxy
@@ -139730,6 +139738,7 @@ rules:
 - DOMAIN-SUFFIX,ustream.tv,Proxy
 - DOMAIN-SUFFIX,usvimosquito.com,Proxy
 - DOMAIN-SUFFIX,usvimosquitoproject.com,Proxy
+- DOMAIN-SUFFIX,utdstc.com,Proxy
 - DOMAIN-SUFFIX,utopianpal.com,Proxy
 - DOMAIN-SUFFIX,uug22.com,Proxy
 - DOMAIN-SUFFIX,uug23.com,Proxy
@@ -142118,6 +142127,8 @@ rules:
 - DOMAIN-SUFFIX,youjism.com,Proxy
 - DOMAIN-SUFFIX,youjizz.com,Proxy
 - DOMAIN-SUFFIX,youjizz.sex,Proxy
+- DOMAIN-SUFFIX,youla.io,Proxy
+- DOMAIN-SUFFIX,youla.ru,Proxy
 - DOMAIN-SUFFIX,youlucky.com,Proxy
 - DOMAIN-SUFFIX,youmaker.com,Proxy
 - DOMAIN-SUFFIX,youmind.ai,Proxy
