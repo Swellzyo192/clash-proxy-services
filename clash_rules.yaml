@@ -6414,6 +6414,7 @@ rules:
 - DOMAIN-SUFFIX,52playgame.com,DIRECT
 - DOMAIN-SUFFIX,52pojie.com,DIRECT
 - DOMAIN-SUFFIX,52post.com,DIRECT
+- DOMAIN-SUFFIX,52ppt.com,DIRECT
 - DOMAIN-SUFFIX,52qixiang.com,DIRECT
 - DOMAIN-SUFFIX,52qmct.com,DIRECT
 - DOMAIN-SUFFIX,52qqba.com,DIRECT
@@ -14693,6 +14694,7 @@ rules:
 - DOMAIN-SUFFIX,badmintoncn.com,DIRECT
 - DOMAIN-SUFFIX,badmintone.com,DIRECT
 - DOMAIN-SUFFIX,badong.net,DIRECT
+- DOMAIN-SUFFIX,badou.com,DIRECT
 - DOMAIN-SUFFIX,badouxueyuan.com,DIRECT
 - DOMAIN-SUFFIX,badu.com,DIRECT
 - DOMAIN-SUFFIX,badudns.cc,DIRECT
@@ -46314,6 +46316,7 @@ rules:
 - DOMAIN-SUFFIX,haohanpower.tech,DIRECT
 - DOMAIN-SUFFIX,haohanstar.com,DIRECT
 - DOMAIN-SUFFIX,haohao8888.com,DIRECT
+- DOMAIN-SUFFIX,haohaodoc.com,DIRECT
 - DOMAIN-SUFFIX,haohaotuan.com,DIRECT
 - DOMAIN-SUFFIX,haohaowan.com,DIRECT
 - DOMAIN-SUFFIX,haohaowan.net,DIRECT
@@ -63751,6 +63754,7 @@ rules:
 - DOMAIN-SUFFIX,lazycatmicroserver.com,DIRECT
 - DOMAIN-SUFFIX,lazycomposer.com,DIRECT
 - DOMAIN-SUFFIX,lazydim.com,DIRECT
+- DOMAIN-SUFFIX,lazyer.net,DIRECT
 - DOMAIN-SUFFIX,lazymap.com,DIRECT
 - DOMAIN-SUFFIX,lazyren.com,DIRECT
 - DOMAIN-SUFFIX,lazystones.com,DIRECT
@@ -100728,6 +100732,7 @@ rules:
 - DOMAIN-SUFFIX,wenjuanshow.com,DIRECT
 - DOMAIN-SUFFIX,wenjuntech.com,DIRECT
 - DOMAIN-SUFFIX,wenkaoba.com,DIRECT
+- DOMAIN-SUFFIX,wenkeju.com,DIRECT
 - DOMAIN-SUFFIX,wenku.in,DIRECT
 - DOMAIN-SUFFIX,wenku.net,DIRECT
 - DOMAIN-SUFFIX,wenku365.com,DIRECT
@@ -125489,6 +125494,7 @@ rules:
 - DOMAIN-SUFFIX,dynamobuilds.com,Proxy
 - DOMAIN-SUFFIX,dynamopackages.com,Proxy
 - DOMAIN-SUFFIX,dynamoreach.com,Proxy
+- DOMAIN-SUFFIX,dynatrace.com,Proxy
 - DOMAIN-SUFFIX,dynawebinc.com,Proxy
 - DOMAIN-SUFFIX,dyncdn.me,Proxy
 - DOMAIN-SUFFIX,dynu.com,Proxy
@@ -126537,6 +126543,7 @@ rules:
 - DOMAIN-SUFFIX,familypies.net,Proxy
 - DOMAIN-SUFFIX,familyporn.tv,Proxy
 - DOMAIN-SUFFIX,familypornhd.com,Proxy
+- DOMAIN-SUFFIX,familysearch.org,Proxy
 - DOMAIN-SUFFIX,familysexsimulator.com,Proxy
 - DOMAIN-SUFFIX,familysimulator.com,Proxy
 - DOMAIN-SUFFIX,familysimulator.io,Proxy
@@ -127524,7 +127531,6 @@ rules:
 - DOMAIN-SUFFIX,full:cbsservice.aws.syncbak.com,Proxy
 - DOMAIN-SUFFIX,full:cdn-spotify-experiments.conductrics.com,Proxy
 - DOMAIN-SUFFIX,full:cdn.js7k.com,Proxy
-- DOMAIN-SUFFIX,full:cdn.jsdelivr.net,Proxy
 - DOMAIN-SUFFIX,full:cdngarenanow-a.akamaihd.net,Proxy
 - DOMAIN-SUFFIX,full:chinapower.csis.org,Proxy
 - DOMAIN-SUFFIX,full:cisco.evergage.com,Proxy
@@ -138412,6 +138418,7 @@ rules:
 - DOMAIN-SUFFIX,shit-porn.net,Proxy
 - DOMAIN-SUFFIX,shithd.com,Proxy
 - DOMAIN-SUFFIX,shitjav.com,Proxy
+- DOMAIN-SUFFIX,shitjournal.org,Proxy
 - DOMAIN-SUFFIX,shittytube.com,Proxy
 - DOMAIN-SUFFIX,shixiao.org,Proxy
 - DOMAIN-SUFFIX,shizhao.org,Proxy
