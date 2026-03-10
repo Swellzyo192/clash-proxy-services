@@ -124314,6 +124314,7 @@ rules:
 - DOMAIN-SUFFIX,cutout.pro,Proxy
 - DOMAIN-SUFFIX,cutscenes.net,Proxy
 - DOMAIN-SUFFIX,cutt.ly,Proxy
+- DOMAIN-SUFFIX,cve.org,Proxy
 - DOMAIN-SUFFIX,cw.com.tw,Proxy
 - DOMAIN-SUFFIX,cwcams.com,Proxy
 - DOMAIN-SUFFIX,cxacg.com,Proxy
