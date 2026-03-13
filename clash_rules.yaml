@@ -123768,10 +123768,12 @@ rules:
 - DOMAIN-SUFFIX,classicalguitarblog.net,Proxy
 - DOMAIN-SUFFIX,classicnike.com,Proxy
 - DOMAIN-SUFFIX,classymomsex.com,Proxy
+- DOMAIN-SUFFIX,clau.de,Proxy
 - DOMAIN-SUFFIX,claude.ai,Proxy
 - DOMAIN-SUFFIX,claude.com,Proxy
 - DOMAIN-SUFFIX,claudemcpclient.com,Proxy
 - DOMAIN-SUFFIX,claudeusercontent.com,Proxy
+- DOMAIN-SUFFIX,clawhub.ai,Proxy
 - DOMAIN-SUFFIX,clco.cc,Proxy
 - DOMAIN-SUFFIX,cldr.unicode.org,Proxy
 - DOMAIN-SUFFIX,clearasil.us,Proxy
@@ -129165,6 +129167,7 @@ rules:
 - DOMAIN-SUFFIX,h-webtoon.com,Proxy
 - DOMAIN-SUFFIX,h0930.com,Proxy
 - DOMAIN-SUFFIX,h18ani1.vip,Proxy
+- DOMAIN-SUFFIX,h2o.ai,Proxy
 - DOMAIN-SUFFIX,h2porn.com,Proxy
 - DOMAIN-SUFFIX,h528.com,Proxy
 - DOMAIN-SUFFIX,habr.com,Proxy
@@ -135468,6 +135471,7 @@ rules:
 - DOMAIN-SUFFIX,openart.ai,Proxy
 - DOMAIN-SUFFIX,openbook.org.tw,Proxy
 - DOMAIN-SUFFIX,opencas.io,Proxy
+- DOMAIN-SUFFIX,openclaw.ai,Proxy
 - DOMAIN-SUFFIX,opencollective.com,Proxy
 - DOMAIN-SUFFIX,opencreate.org,Proxy
 - DOMAIN-SUFFIX,opencritic.com,Proxy
